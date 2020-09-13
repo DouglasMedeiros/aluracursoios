@@ -18,13 +18,22 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // MARK: - Atributos
     
-    let listaViagens:[Viagem] = ViagemDao().retornaTodasAsViagens()
+    var listaViagens: Viagens = []
     
+    // MARK: - Load
+    
+    func loadData() {
+        ViagemDao().retornaTodasAsViagens { (viagens) in
+            self.listaViagens = viagens
+            self.tabelaViagens.reloadData()
+        }
+    }
     // MARK: - View Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configuraViews()
+        loadData()
     }
     
     // MARK: - Métodos
@@ -43,6 +52,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCell", for: indexPath) as! TableViewCell
         let viagemAtual = listaViagens[indexPath.row]
+        cell.parentViewController = self
+        cell.contentView.tag = indexPath.row
         cell.configuraCelula(viagemAtual)
         
         return cell

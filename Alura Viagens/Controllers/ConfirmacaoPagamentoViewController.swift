@@ -7,7 +7,8 @@
 //
 
 import UIKit
-
+import Alamofire
+import AlamofireImage
 class ConfirmacaoPagamentoViewController: UIViewController {
     
     // MARK: - IBOutlets
@@ -36,9 +37,16 @@ class ConfirmacaoPagamentoViewController: UIViewController {
     func configuraOutlets() {
         guard let pacote = pacoteComprado else { return }
         
-        imagemPacoteViagem.image = UIImage(named: pacote.viagem.caminhoDaImagem)
+        let viagem: Viagem = pacote.viagem()
+        
+        AF.request(viagem.caminhoDaImagem).responseImage { response in
+            if case .success(let image) = response.result {
+                self.imagemPacoteViagem.image = image
+            }
+        }
+        
         labelHotelPacoteViagem.text = pacote.nomeDoHotel
-        labelTituloPacoteViagem.text = pacote.viagem.titulo.uppercased()
+        labelTituloPacoteViagem.text = viagem.titulo.uppercased()
         labelDataPacoteViagem.text = pacote.dataViagem
         labelDescricaoPacoteViagem.text = pacote.descricao
         

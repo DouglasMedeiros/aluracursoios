@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Alamofire
+import AlamofireImage
 
 class DetalhesViagemViewController: UIViewController {
     
@@ -38,11 +40,18 @@ class DetalhesViagemViewController: UIViewController {
     
     func configuraOutlets() {
         guard let pacote = pacoteSelecionado else { return }
-        imagemPacoteViagem.image = UIImage(named: pacote.viagem.caminhoDaImagem)
-        labelTituloPacoteViagem.text = pacote.viagem.titulo
+        let viagem = pacote.viagem()
+        
+        AF.request(viagem.caminhoDaImagem).responseImage { response in
+            if case .success(let image) = response.result {
+                self.imagemPacoteViagem.image = image
+            }
+        }
+        
+        labelTituloPacoteViagem.text = viagem.titulo
         labelDescricaoPacoteViagem.text = pacote.descricao
         labelDataViagem.text = pacote.dataViagem
-        labelPrecoPacoteViagem.text = pacote.viagem.preco
+        labelPrecoPacoteViagem.text = viagem.preco
     }
     
     @objc func redimensionaScrollView(_ notification: Notification) {

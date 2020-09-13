@@ -1,61 +1,42 @@
-//
-//  PacotesViagensViewController.swift
-//  Alura Viagens
-//
-//  Created by Alura on 25/06/18.
-//  Copyright © 2018 Alura. All rights reserved.
-//
-
 import UIKit
+import CoreData
 
-class PacotesViagensViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UISearchBarDelegate {
+class FavoritosViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UISearchBarDelegate {
     
     // MARK: - IBOutlets
     
     @IBOutlet weak var colecaoPacotesViagens: UICollectionView!
-    @IBOutlet weak var pesquisarViagens: UISearchBar!
-    @IBOutlet weak var labelContadorPacotes: UILabel!
     
     // MARK: - Atributos
     
-    var listaComTodasViagens: [PacoteViagem] = []
     var listaViagens: [PacoteViagem] = []
     
     // MARK: - Load data
     
     func loadData() {
-        PacoteViagemDao().retornaTodasAsViagens { (pacotes) in
-            self.listaComTodasViagens = pacotes
-            self.listaViagens = self.listaComTodasViagens
-            self.labelContadorPacotes.text = self.atualizaContadorLabel()
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context: NSManagedObjectContext = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest: NSFetchRequest<Favorito> = Favorito.fetchRequest()
+        if let favorites = try? context.fetch(fetchRequest) {
+            let pacotes = favorites.map({ (favorite: Favorito) -> PacoteViagem in
+                return PacoteViagem(id: Int(favorite.identificador), nomeDoHotel: favorite.nomeHotel ?? "", descricao: favorite.descricao ?? "", dataViagem: favorite.dataViagem ?? "", titulo: favorite.titulo ?? "", quantidadeDeDias: Int(favorite.quantidadeDias), preco: favorite.preco ?? "", caminhoDaImagem: favorite.caminhoImagem ?? "", localizacao: favorite.localizacao ?? "")
+            })
+            
+            self.listaViagens = pacotes
             self.colecaoPacotesViagens.reloadData()
+            
         }
     }
     // MARK: - View Life Cycle
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        pesquisarViagens.delegate = self
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadData()
     }
     
     // MARK: - Métodos
-    
-    func atualizaContadorLabel() -> String {
-        return listaViagens.count == 1 ? "1 pacote encontrado" : "\(listaViagens.count) pacotes encontrados"
-    }
-    
-    // MARK: - UISearchBarDelegate
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        listaViagens = listaComTodasViagens
-        if searchText != "" {
-            listaViagens = listaViagens.filter({ $0.viagem().titulo.contains(searchText) })
-        }
-        labelContadorPacotes.text = atualizaContadorLabel()
-        colecaoPacotesViagens.reloadData()
-    }
-    
     // MARK: - UICollectionViewDataSource
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

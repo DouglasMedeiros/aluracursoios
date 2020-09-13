@@ -8,18 +8,35 @@
 
 import UIKit
 
-class PacoteViagem: NSObject {
+typealias PacotesViagens = [PacoteViagem]
+
+struct PacoteViagem: Codable {
     
+    let id: Int
     let nomeDoHotel: String
     let descricao: String
     let dataViagem: String
-    let viagem: Viagem
     
-    init(nomeDoHotel: String, descricao: String, dataViagem: String, viagem: Viagem) {
-        self.nomeDoHotel = nomeDoHotel
-        self.descricao = descricao
-        self.dataViagem = dataViagem
-        self.viagem = viagem
+    let titulo: String
+    let quantidadeDeDias: Int
+    let preco: String
+    let caminhoDaImagem: String
+    let localizacao: String
+    
+    func viagem() -> Viagem {
+        return Viagem(titulo: titulo, quantidadeDeDias: quantidadeDeDias, preco: preco, caminhoDaImagem: caminhoDaImagem, localizacao: localizacao)
     }
-
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case nomeDoHotel
+        case descricao = "servico"
+        case dataViagem = "data"
+        
+        case titulo, quantidadeDeDias, preco
+        case caminhoDaImagem = "imageUrl"
+        case localizacao = "localizacao"
+    }
+    
+    
 }
